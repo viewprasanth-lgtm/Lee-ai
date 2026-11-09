@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#07111f">
+<title>LEE — Personal AI</title>
+<style>
+:root{color-scheme:dark;--blue:#55c8ff;--muted:#9db3c8}*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 38%,#123454 0,#07111f 48%,#030811 100%);font-family:system-ui,Arial,sans-serif;color:#eff8ff;display:grid;place-items:center;padding:22px}
+main{width:min(440px,100%);text-align:center}.eyebrow{letter-spacing:.28em;color:var(--blue);font-size:12px}.brand{font-size:52px;font-weight:800;letter-spacing:.18em;margin:8px 0 0;text-shadow:0 0 28px #39baff66}.sub{color:var(--muted);margin:4px 0 28px}
+.orb{width:210px;height:210px;border-radius:50%;margin:0 auto 26px;border:1px solid #63cfff88;display:grid;place-items:center;box-shadow:0 0 28px #32baff44,inset 0 0 34px #32baff22;background:radial-gradient(circle,#1a5a82 0,#0b2038 55%,#07111f 75%);position:relative}
+.orb:before,.orb:after{content:"";position:absolute;border:1px solid #5bcaff55;border-radius:50%;inset:12px}.orb:after{inset:-9px;border-style:dashed;opacity:.55}.mic{font-size:58px;color:#dff7ff}
+.status{font-size:17px;min-height:28px;margin:10px 0;color:#d8efff}button{border:1px solid #62cfff88;background:#123653;color:#fff;border-radius:999px;padding:14px 22px;font-size:15px;font-weight:650;margin:6px;min-width:145px}button.primary{background:linear-gradient(120deg,#087bb5,#174d85);box-shadow:0 0 20px #28aaff44}button:disabled{opacity:.45}
+.panel{margin-top:22px;padding:17px;border:1px solid #3b83aa66;border-radius:18px;background:#071827bb;text-align:left;color:#d8eafa;font-size:14px;line-height:1.55}.small{color:var(--muted);font-size:12px}#heard{margin-top:8px;overflow-wrap:anywhere}
+</style></head><body><main>
+<div class="eyebrow">PERSONAL AI ASSISTANT</div><div class="brand">LEE</div><div class="sub">Good day, Boss.</div>
+<div class="orb"><div class="mic">◉</div></div><div id="status" class="status">LEE is ready, Boss.</div>
+<button class="primary" id="listen">Talk to LEE</button><button id="stop" disabled>Stop</button><button id="voiceTest">Test LEE voice</button>
+<div class="panel"><strong>LEE Voice Reply — Phase 2</strong><div id="heard">Tap “Talk to LEE” and say “Hey LEE”.</div>
+<p class="small">LEE uses a female-style voice if your browser/device provides one. Voice availability depends on Android and browser settings. This prototype replies aloud, but does not yet verify that the speaker is Boss, listen continuously for a wake word, or control phone apps.</p></div>
+</main><script>
+const statusEl=document.getElementById('status'),heard=document.getElementById('heard'),listen=document.getElementById('listen'),stop=document.getElementById('stop'),voiceTest=document.getElementById('voiceTest');
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+function chooseFemaleVoice(){if(!('speechSynthesis'in window))return null;const vs=window.speechSynthesis.getVoices();return vs.find(v=>/female|woman|zira|samantha|susan|karen|moira|tessa|veena|heera|lekha|google.*(uk|us).*english/i.test(v.name))||vs.find(v=>/^en[-_]/i.test(v.lang))||vs[0]||null;}
+function speak(text){if(!('speechSynthesis'in window)){statusEl.textContent='Voice output is not supported on this browser.';return;}window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-IN';u.rate=.95;u.pitch=1.12;const v=chooseFemaleVoice();if(v)u.voice=v;u.onstart=()=>statusEl.textContent='LEE is speaking, Boss…';u.onend=()=>statusEl.textContent='Ready for you, Boss.';u.onerror=()=>statusEl.textContent='Voice reply could not play. Check phone media volume.';window.speechSynthesis.speak(u);}
+voiceTest.onclick=()=>speak('Hello Boss. I am LEE, your personal assistant. How can I help you?');
+if(!SpeechRecognition){statusEl.textContent='Speech recognition is not supported in this browser.';listen.disabled=true;}else{const r=new SpeechRecognition();r.lang='en-IN';r.continuous=false;r.interimResults=true;r.onstart=()=>{statusEl.textContent='Listening, Boss…';listen.disabled=true;stop.disabled=false;};r.onresult=e=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;heard.textContent='Heard: '+t;if(e.results[e.results.length-1].isFinal){const s=t.toLowerCase();if(s.includes('hey lee')||s.includes('hello lee'))speak("Yes Boss, I'm listening.");else if(s.includes('how are you'))speak('I am doing well, Boss. Thank you for asking.');else speak('I heard you, Boss. How can I help?');}};r.onerror=e=>statusEl.textContent='Microphone issue: '+e.error;r.onend=()=>{listen.disabled=false;stop.disabled=true;if(!window.speechSynthesis.speaking)statusEl.textContent='Ready for you, Boss.';};listen.onclick=()=>{heard.textContent='';try{r.start();}catch(e){statusEl.textContent='Please wait a moment and try again.';}};stop.onclick=()=>{r.stop();window.speechSynthesis.cancel();statusEl.textContent='Stopped.';};}
+if('speechSynthesis'in window)window.speechSynthesis.onvoiceschanged=()=>chooseFemaleVoice();
+</script></body></html>
