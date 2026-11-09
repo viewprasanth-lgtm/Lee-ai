@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07111f">
+<title>LEE — Personal AI</title>
+<style>
+:root{color-scheme:dark;--bg:#07111f;--blue:#55c8ff;--muted:#9db3c8}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 38%,#123454 0,#07111f 48%,#030811 100%);font-family:system-ui,Arial,sans-serif;color:#eff8ff;display:grid;place-items:center;padding:22px}
+main{width:min(440px,100%);text-align:center}.eyebrow{letter-spacing:.28em;color:var(--blue);font-size:12px}.brand{font-size:52px;font-weight:800;letter-spacing:.18em;margin:8px 0 0;text-shadow:0 0 28px #39baff66}.sub{color:var(--muted);margin:4px 0 28px}
+.orb{width:210px;height:210px;border-radius:50%;margin:0 auto 26px;border:1px solid #63cfff88;display:grid;place-items:center;box-shadow:0 0 28px #32baff44,inset 0 0 34px #32baff22;background:radial-gradient(circle,#1a5a82 0,#0b2038 55%,#07111f 75%);position:relative}
+.orb:before,.orb:after{content:"";position:absolute;border:1px solid #5bcaff55;border-radius:50%;inset:12px}.orb:after{inset:-9px;border-style:dashed;opacity:.55}
+.mic{font-size:58px;color:#dff7ff}.status{font-size:17px;min-height:28px;margin:10px 0;color:#d8efff}
+button{border:1px solid #62cfff88;background:#123653;color:#fff;border-radius:999px;padding:14px 22px;font-size:15px;font-weight:650;margin:6px;min-width:145px}
+button.primary{background:linear-gradient(120deg,#087bb5,#174d85);box-shadow:0 0 20px #28aaff44}
+button:disabled{opacity:.45}.panel{margin-top:26px;padding:17px;border:1px solid #3b83aa66;border-radius:18px;background:#071827bb;text-align:left;color:#d8eafa;font-size:14px;line-height:1.55}.small{color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">PERSONAL AI ASSISTANT</div>
+  <div class="brand">LEE</div>
+  <div class="sub">Good day, Boss.</div>
+  <div class="orb"><div class="mic">◉</div></div>
+  <div id="status" class="status">LEE is ready for setup</div>
+  <button class="primary" id="listen">Test microphone</button>
+  <button id="stop" disabled>Stop</button>
+  <div class="panel">
+    <strong>Voice setup — Phase 1</strong>
+    <div id="heard">Your spoken words will appear here after microphone permission is granted.</div>
+    <p class="small">This is an initial mobile interface and microphone test only. It does not yet authenticate your identity, listen continuously for “Hey LEE”, or control phone apps. Those require a dedicated Android app and additional permissions.</p>
+  </div>
+</main>
+<script>
+const statusEl=document.getElementById('status'), heard=document.getElementById('heard');
+const listen=document.getElementById('listen'), stop=document.getElementById('stop');
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition;
+if(!SpeechRecognition){statusEl.textContent='Speech recognition is not supported in this browser';listen.disabled=true;}
+else{
+ recognition=new SpeechRecognition(); recognition.lang='en-IN'; recognition.continuous=false; recognition.interimResults=true;
+ recognition.onstart=()=>{statusEl.textContent='Listening…';listen.disabled=true;stop.disabled=false;};
+ recognition.onresult=e=>{let s='';for(let i=e.resultIndex;i<e.results.length;i++)s+=e.results[i][0].transcript;heard.textContent='Heard: '+s;};
+ recognition.onerror=e=>{statusEl.textContent='Microphone issue: '+e.error;};
+ recognition.onend=()=>{if(statusEl.textContent==='Listening…')statusEl.textContent='Microphone test finished';listen.disabled=false;stop.disabled=true;};
+ listen.onclick=()=>{heard.textContent='';try{recognition.start();}catch(e){statusEl.textContent='Please wait, then try again.';}};
+ stop.onclick=()=>recognition.stop();
+}
+</script>
+</body>
+</html>
